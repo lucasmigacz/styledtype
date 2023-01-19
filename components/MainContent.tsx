@@ -1,75 +1,78 @@
-import React, { FormEvent, useEffect, useState } from "react";
-import styled from "styled-components";
-import { FiDelete, FiEdit } from "react-icons/fi";
-import ModalEditTodos from "./ModalEditTodos";
+import React, { FormEvent, useEffect, useState } from 'react';
+import styled from 'styled-components';
+import { FiDelete, FiEdit } from 'react-icons/fi';
+import ModalEditTodos from './ModalEditTodos';
 
 interface todoProps {
   titleTodo: string;
   dificultyTodo: string;
   id: number;
 }
+
+interface addTodoProps {
+  titleTodo: string;
+  dificultyTodo: string;
+}
+
+const url = 'http://localhost:3000/todos';
+
 const MainConteont = () => {
-  const [titleTodo, setTitleTodo] = useState("");
-  const [dificultyTodo, setDificultyTodo] = useState("");
+  // form
+  const [titleTodo, setTitleTodo] = useState('');
+  const [dificultyTodo, setDificultyTodo] = useState('');
   const [todoList, setTodoList] = useState<todoProps[]>([]);
-  const [callFetch, setCallFetch] = useState();
-  const [modalState, setModalState] = useState(false);
-  const [currentTodoId, setCurrentTodoId] = useState<number>();
 
-  const url = "http://localhost:3000/todos";
+  const [modalState, setModalState] = useState<false | number>(false);
 
-  const sendData = async (e: FormEvent) => {
+  useEffect(() => {
+    fetch(url)
+      .then((res) => res.json())
+      .then((json) => setTodoList(json));
+  }, []);
+
+  const resetForm = () => {
+    setTitleTodo('');
+    setDificultyTodo('');
+  };
+
+  const addTodo = async (todo: addTodoProps) => {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(todo),
+    });
+
+    const json = await res.json();
+
+    setTodoList((prev) => [...prev, json]);
+    resetForm();
+  };
+
+  const removeTodo = async (todoId: Number) => {
+    const res = await fetch(`${url}/${todoId}`, {
+      method: 'DELETE',
+    });
+    setTodoList((prev) => prev.filter((current) => current.id !== todoId));
+  };
+
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    const todos = {
+    const todo = {
       titleTodo,
       dificultyTodo,
     };
-    const res = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(todos),
-    });
-    const json = await res.json();
-    setCallFetch(json);
-    setTitleTodo("");
-    setDificultyTodo("");
+    addTodo(todo);
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const res = await fetch(url);
-      const json = await res.json();
-      setTodoList(json);
-    };
-    fetchData();
-  }, [callFetch]);
-
-  const handleRemove = async (todoId: Number) => {
-    const res = await fetch(`${url}/${todoId}`, {
-      method: "DELETE",
-    });
-    const json = await res.json();
-    setCallFetch(json);
-  };
-  // const handleEdit = async (todoId: Number) => {
-  //   const todos = {
-  //     titleTodo,
-  //     dificultyTodo,
-  //   };
-  //   const edit = await fetch(`${url}/${todoId}`, {
-  //     method: "PUT",
-  //     body: JSON.stringify(todos);
-  //   });
-  // };
   return (
     <MainContent>
       <TitleMainContent>O que você vai fazer?</TitleMainContent>
-      <Form onSubmit={sendData}>
+      <Form onSubmit={handleSubmit}>
         <Label>Título: </Label>
         <Input
-          placeholder="Título da tarefa"
+          placeholder='Título da tarefa'
           value={titleTodo}
           required
           onChange={(e) => {
@@ -78,20 +81,20 @@ const MainConteont = () => {
         />
         <Label>Dificuldade: </Label>
         <Input
-          type="number"
+          type='number'
           required
           value={dificultyTodo}
-          placeholder="1"
+          placeholder='1'
           onChange={(e) => {
             setDificultyTodo(e.target.value);
           }}
         />
-        <ButtonSubmit type="submit" value="Cadastrar" />
+        <ButtonSubmit type='submit' value='Cadastrar' />
       </Form>
-      {modalState && (
+      {modalState !== false && (
         <ModalEditTodos
           setModalState={setModalState}
-          todoId={currentTodoId}
+          todoId={modalState}
           setTitleTodo={setTitleTodo}
           dificultyTodo={dificultyTodo}
           setDificultyTodo={setDificultyTodo}
@@ -104,15 +107,12 @@ const MainConteont = () => {
             {todoList.map((todo) => (
               <LiStyledTodos key={`todo_${todo.id}`}>
                 <>
-                  {setCurrentTodoId(todo.id)}
+                  {/* {setCurrentTodoId(todo.id)} */}
                   {todo.titleTodo}
                   <p>Dificuldade:</p> {todo.dificultyTodo}
                   <DivButtonDelete>
-                    <FiEdit
-                      onClick={() => setModalState((prev) => !prev)}
-                      size={35}
-                    />
-                    <FiDelete onClick={() => handleRemove(todo.id)} size={35} />
+                    <FiEdit onClick={() => setModalState(todo.id)} size={35} />
+                    <FiDelete onClick={() => removeTodo(todo.id)} size={35} />
                   </DivButtonDelete>
                 </>
               </LiStyledTodos>

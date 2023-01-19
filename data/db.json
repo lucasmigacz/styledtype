@@ -1,24 +1,19 @@
 {
   "todos": [
     {
-      "titleTodo": "fazer tal coisa",
-      "dificultyTodo": "1",
+      "titleTodo": "sdgsgds",
+      "dificultyTodo": "3",
       "id": 1
     },
     {
-      "titleTodo": "asd",
+      "titleTodo": "sgvdf",
       "dificultyTodo": "234",
-      "id": 2
+      "id": 9
     },
     {
-      "titleTodo": "asd",
-      "dificultyTodo": "1234",
-      "id": 3
-    },
-    {
-      "titleTodo": "asdas",
-      "dificultyTodo": "2132",
-      "id": 4
+      "titleTodo": "sfggfsd",
+      "dificultyTodo": "3453",
+      "id": 10
     }
   ]
 }
