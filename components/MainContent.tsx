@@ -1,7 +1,8 @@
-import React, { FormEvent, useEffect, useState } from 'react';
-import styled from 'styled-components';
-import { FiDelete, FiEdit } from 'react-icons/fi';
-import ModalEditTodos from './ModalEditTodos';
+import React, { FormEvent, useEffect, useState } from "react";
+import styled from "styled-components";
+import { FiDelete, FiEdit, FiCheck } from "react-icons/fi";
+import ModalEditTodos from "./ModalEditTodos";
+import { AnimatePresence } from "framer-motion";
 
 interface todoProps {
   titleTodo: string;
@@ -14,12 +15,12 @@ interface addTodoProps {
   dificultyTodo: string;
 }
 
-const url = 'http://localhost:3000/todos';
+const url = "http://localhost:3000/todos";
 
 const MainConteont = () => {
   // form
-  const [titleTodo, setTitleTodo] = useState('');
-  const [dificultyTodo, setDificultyTodo] = useState('');
+  const [titleTodo, setTitleTodo] = useState("");
+  const [dificultyTodo, setDificultyTodo] = useState("");
   const [todoList, setTodoList] = useState<todoProps[]>([]);
 
   const [modalState, setModalState] = useState<false | number>(false);
@@ -31,15 +32,15 @@ const MainConteont = () => {
   }, []);
 
   const resetForm = () => {
-    setTitleTodo('');
-    setDificultyTodo('');
+    setTitleTodo("");
+    setDificultyTodo("");
   };
 
   const addTodo = async (todo: addTodoProps) => {
     const res = await fetch(url, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(todo),
     });
@@ -52,7 +53,7 @@ const MainConteont = () => {
 
   const removeTodo = async (todoId: Number) => {
     const res = await fetch(`${url}/${todoId}`, {
-      method: 'DELETE',
+      method: "DELETE",
     });
     setTodoList((prev) => prev.filter((current) => current.id !== todoId));
   };
@@ -72,7 +73,7 @@ const MainConteont = () => {
       <Form onSubmit={handleSubmit}>
         <Label>Título: </Label>
         <Input
-          placeholder='Título da tarefa'
+          placeholder="Título da tarefa"
           value={titleTodo}
           required
           onChange={(e) => {
@@ -81,38 +82,53 @@ const MainConteont = () => {
         />
         <Label>Dificuldade: </Label>
         <Input
-          type='number'
+          type="number"
           required
           value={dificultyTodo}
-          placeholder='1'
+          placeholder="1"
           onChange={(e) => {
             setDificultyTodo(e.target.value);
           }}
         />
-        <ButtonSubmit type='submit' value='Cadastrar' />
+        <ButtonSubmit type="submit" value="Cadastrar" />
       </Form>
-      {modalState !== false && (
-        <ModalEditTodos
-          setModalState={setModalState}
-          todoId={modalState}
-          setTitleTodo={setTitleTodo}
-          dificultyTodo={dificultyTodo}
-          setDificultyTodo={setDificultyTodo}
-        />
-      )}
+      <AnimatePresence>
+        {modalState !== false && (
+          <ModalEditTodos
+            setModalState={setModalState}
+            todoId={modalState}
+            titleTodo={titleTodo}
+            setTitleTodo={setTitleTodo}
+            dificultyTodo={dificultyTodo}
+            setDificultyTodo={setDificultyTodo}
+            url={url}
+          />
+        )}
+      </AnimatePresence>
       <SubTitleTodos>Suas tarefas:</SubTitleTodos>
       <div>
         {todoList.length > 0 ? (
           <UlStyledTodos>
             {todoList.map((todo) => (
-              <LiStyledTodos key={`todo_${todo.id}`}>
+              <LiStyledTodos
+                key={`todo_${todo.id}`}
+                onClick={() => setModalState(todo.id)}
+              >
                 <>
                   {/* {setCurrentTodoId(todo.id)} */}
                   {todo.titleTodo}
-                  <p>Dificuldade:</p> {todo.dificultyTodo}
+                  <Dificulty>Dificuldade:</Dificulty> {todo.dificultyTodo}
                   <DivButtonDelete>
-                    <FiEdit onClick={() => setModalState(todo.id)} size={35} />
-                    <FiDelete onClick={() => removeTodo(todo.id)} size={35} />
+                    <FiEdit
+                      onClick={() => setModalState(todo.id)}
+                      size={35}
+                      style={{ margin: 5 }}
+                    />
+                    <FiDelete
+                      onClick={() => removeTodo(todo.id)}
+                      size={35}
+                      style={{ margin: 5 }}
+                    />
                   </DivButtonDelete>
                 </>
               </LiStyledTodos>
@@ -149,6 +165,7 @@ const Input = styled.input`
   padding: 4px 90px;
   font-size: 1.1em;
   transition: 0.3s;
+  cursor: default;
   :focus {
     outline: 0;
     transform: scale(1.01);
@@ -175,14 +192,13 @@ const LiStyledTodos = styled.li`
   border-radius: 20px;
   padding: 5px;
   margin: 5px 5px 5px 5px;
-  display: flex;
+  display: grid;
+  place-items: center;
   flex-direction: column;
   transition: 0.2s;
-  align-items: center;
-  justify-content: center;
+  cursor: default;
   font-size: 1.2em;
   color: #c0c0c7;
-  cursor: default;
   :hover {
     transform: scale(1.02);
   }
@@ -190,10 +206,16 @@ const LiStyledTodos = styled.li`
 const UlStyledTodos = styled.ul`
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
+
   margin-bottom: 50px;
   z-index: 999;
+`;
+
+const Dificulty = styled.p`
+  font-size: 1em;
+  color: #383636;
+  cursor: default;
+  font-weight: bold;
 `;
 const ParagraphNoHaveTodos = styled.p`
   font-size: 1.2em;
@@ -204,8 +226,7 @@ const DivButtonDelete = styled.div`
   padding: 5px;
   cursor: pointer;
   display: flex;
-  flex-direction: column;
-  align-self: flex-end;
+  align-items: center;
   margin-bottom: auto;
 `;
 

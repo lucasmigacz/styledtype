@@ -15,21 +15,20 @@ const Footer = () => {
 };
 
 const FooterContainer = styled.footer`
-  background: #333232;
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-  position: fixed;
+  position: absolute;
   bottom: 0;
   left: 0;
+  background: #333232;
   width: 100%;
-  height: 200px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;
 const FooterContent = styled.p`
   font-size: 1.4em;
   color: #3ccece;
   font-weight: bold;
-  margin-bottom: 40px;
 `;
 const Span = styled.span`
   color: #f6f6f6;

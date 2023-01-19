@@ -1,6 +1,7 @@
-import { useState, useRef } from "react";
+import { useRef } from "react";
 import styled from "styled-components";
 import { useClickAway } from "react-use";
+import { motion } from "framer-motion";
 
 const ModalEditTodos = ({
   setModalState,
@@ -9,47 +10,72 @@ const ModalEditTodos = ({
   setTitleTodo,
   setDificultyTodo,
   todoId,
+  url,
 }: any) => {
   const ref = useRef(null);
   useClickAway(ref, () => {
     setModalState(false);
   });
+  const handleChangeData = async () => {
+    const todo = {
+      titleTodo,
+      dificultyTodo,
+    };
+    console.log(todo);
+    await fetch(`${url}/${todoId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(todo),
+    });
+  };
   return (
     <AlignDiv>
-      <MainContainer ref={ref}>
-        <TitleModal>Editar tarefa</TitleModal>
-        <Form>
-          <Label>Título: </Label>
-          <Input
-            placeholder="Título da tarefa"
-            value={titleTodo}
-            required
-            onChange={(e) => {
-              setTitleTodo(e.target.value);
-            }}
-          />
-          <Label>Dificuldade: </Label>
-          <Input
-            type="number"
-            required
-            value={dificultyTodo}
-            placeholder="1"
-            onChange={(e) => {
-              setDificultyTodo(e.target.value);
-            }}
-          />
-          <ButtonSubmit type="submit" value="Cadastrar" />
-        </Form>
+      <MainContainer
+        ref={ref}
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        exit={{ scale: 0 }}
+        transition={{ duration: 0.2 }}
+      >
+        <>
+          <TitleModal>Editar tarefa</TitleModal>
+          <Form onSubmit={handleChangeData}>
+            <Label>Título: </Label>
+            <Input
+              placeholder="Título da tarefa"
+              value={titleTodo}
+              required
+              onChange={(e) => {
+                setTitleTodo(e.target.value);
+              }}
+            />
+            <Label>Dificuldade: </Label>
+            <Input
+              type="number"
+              required
+              value={dificultyTodo}
+              placeholder="1"
+              onChange={(e) => {
+                setDificultyTodo(e.target.value);
+              }}
+            />
+            <ButtonSubmit type="submit" value="Alterar dados" />
+          </Form>
+          {console.log(dificultyTodo)}
+          {console.log(titleTodo)}
+        </>
       </MainContainer>
     </AlignDiv>
   );
 };
 export const AlignDiv = styled.div`
-  display: flex;
-  justify-content: center;
+  display: grid;
+  place-items: center;
 `;
-export const MainContainer = styled.div`
-  width: 40%;
+export const MainContainer = styled(motion.div)`
+  width: 30%;
   height: 50%;
   backdrop-filter: blur(10px);
   background: #a09898;
@@ -62,7 +88,6 @@ export const MainContainer = styled.div`
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  margin-top: 5%;
 `;
 export const TitleModal = styled.h1``;
 const Form = styled.form`
