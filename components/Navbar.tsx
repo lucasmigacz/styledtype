@@ -12,6 +12,8 @@ const Navbar = () => {
 
 const NavbarContainer = styled.nav`
   height: 100px;
+  width: 100%;
+  position: absolute;
   display: flex;
   justify-content: center;
   align-items: center;
